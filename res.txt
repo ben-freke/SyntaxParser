@@ -1,7 +1,13 @@
-CompilationException
-CompilationException
-CompilationException
-CompilationException
-CompilationException
-CompilationException
-CompilationException
+CompilationException: Error. Received: "begim" on Line 1. Expecting: "begin"
+CompilationException: Error. Did not receive closing statement for "if" on Line 11
+CompilationException: Error. Received: ";" on Line 7. Expecting: "loop"
+CompilationException: ------- Error ------- 
+ Line: 4
+ Token: else 
+ Message: Received: "else" without corresponding "if"
+CompilationException: ------- Error ------- 
+ Line: 12
+ Token: call
+ Expecting: EOF 
+ Message: Received: "call" after calling "end"
+

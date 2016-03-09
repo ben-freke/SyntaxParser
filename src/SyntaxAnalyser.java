@@ -1,11 +1,13 @@
-import com.sun.xml.internal.ws.api.pipe.NextAction;
+/**
+ *
+ * @author Ben Freke
+ * (C) Ben Freke 2016
+ * www.benfreke.com
+ *
+ */
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
-/**
- * @Author: Ben Freke
- */
 public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
     public SyntaxAnalyser(String filename){
         try {
@@ -18,140 +20,153 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
 
     @Override
     void _statementPart_() throws IOException, CompilationException {
-        acceptTerminal(2);
+        myGenerate.commenceNonterminal("<statement part>");
+        acceptTerminal(Token.beginSymbol);
         _statementList_();
+        myGenerate.finishNonterminal("<statement part>");
+
     }
 
     void _statementList_() throws IOException, CompilationException {
+        myGenerate.commenceNonterminal("<statement list>");
         while (nextToken.symbol != Token.endSymbol)
         {
             _statement_();
             if (nextToken.symbol != Token.endSymbol) acceptTerminal(Token.semicolonSymbol);
             else {
-                acceptTerminal(Token.endSymbol);
                 break;
             }
         }
+        myGenerate.finishNonterminal("<statement list>");
+        acceptTerminal(Token.endSymbol);
     }
 
     void _statement_() throws IOException, CompilationException {
+        myGenerate.commenceNonterminal("<statement>");
         switch (nextToken.symbol)
         {
-            case 3: /**Procedure**/
-                acceptTerminal(3);
+            case Token.callSymbol: /**Procedure**/
                 _procedureStatement_();
                 break;
-            case 7: /**Do**/
-                acceptTerminal(7);
+            case Token.untilSymbol: /**Until**/
                 _untilStatement_();
                 break;
-            case 16: /**Identifier**/
-                acceptTerminal(16);
+            case Token.identifier: /**Identifier**/
                 _assignmentStatement_();
                 break;
-            case 17: /**If**/
-                acceptTerminal(17);
+            case Token.ifSymbol: /**If**/
                 _ifStatement_();
                 break;
-            case 36: /**While**/
-                acceptTerminal(36);
-                _condition_();
-                acceptTerminal(23);
-                _statementList_();
-                acceptTerminal(23);
+            case Token.whileSymbol: /**While**/
+                _whileStatement_();
                 break;
-
         }
+        myGenerate.finishNonterminal("<statement>");
+
     }
 
     void _assignmentStatement_() throws IOException, CompilationException {
-        acceptTerminal(1);
+        myGenerate.commenceNonterminal("<assignment statement>");
+        acceptTerminal(Token.identifier);
+        acceptTerminal(Token.becomesSymbol);
         switch (nextToken.symbol)
         {
-            case 31:
-                acceptTerminal(31);
+            case Token.stringConstant:
+                acceptTerminal(Token.stringConstant);
                 break;
             default:
                 _expression_();
         }
-
+        myGenerate.finishNonterminal("<assignment statement>");
     }
 
     void _procedureStatement_() throws IOException, CompilationException {
-        acceptTerminal(16);
-        acceptTerminal(20);
+        myGenerate.commenceNonterminal("<procedure statement>");
+        acceptTerminal(Token.callSymbol);
+        acceptTerminal(Token.identifier);
+        acceptTerminal(Token.leftParenthesis);
         _argumentList_();
-        acceptTerminal(29);
+        acceptTerminal(Token.rightParenthesis);
+        myGenerate.finishNonterminal("<procedure statement>");
+
     }
 
     void _argumentList_() throws IOException, CompilationException {
+        myGenerate.commenceNonterminal("<argument list>");
         switch (nextToken.symbol)
         {
-            case 16:
-                acceptTerminal(16);
+            case Token.identifier:
+                acceptTerminal(Token.identifier);
                 break;
             default:
                 _argumentList_();
-                acceptTerminal(5);
-                acceptTerminal(16);
+                acceptTerminal(Token.commaSymbol);
+                acceptTerminal(Token.identifier);
         }
+        myGenerate.finishNonterminal("<argument list>");
+
     }
 
     void _untilStatement_() throws IOException, CompilationException {
-
+        myGenerate.commenceNonterminal("<until statement>");
+        acceptTerminal(Token.doSymbol);
         _statementList_();
-        acceptTerminal(35);
+        acceptTerminal(Token.untilSymbol);
         _condition_();
+        myGenerate.finishNonterminal("<until statement>");
 
     }
 
-    void _whileStatement_() throws IOException, CompilationException {}
+    void _whileStatement_() throws IOException, CompilationException {
+        myGenerate.commenceNonterminal("<while statement>");
+        acceptTerminal(Token.whileSymbol);
+        _condition_();
+        acceptTerminal(Token.loopSymbol);
+        _statementList_();
+        acceptTerminal(Token.loopSymbol);
+        myGenerate.finishNonterminal("<while statement>");
+
+    }
 
     void _ifStatement_() throws IOException, CompilationException {
+        myGenerate.commenceNonterminal("<if statement>");
+        acceptTerminal(Token.ifSymbol);
         _condition_();
-        acceptTerminal(34);
+        acceptTerminal(Token.thenSymbol);
         _statementList_();
         switch (nextToken.symbol)
         {
-            case 8:
-                acceptTerminal(8);
-                acceptTerminal(17);
+            case Token.endSymbol:
+                acceptTerminal(Token.endSymbol);
+                acceptTerminal(Token.ifSymbol);
                 break;
-            case 9:
-                acceptTerminal(9);
+            case Token.elseSymbol:
+                acceptTerminal(Token.elseSymbol);
                 _statementList_();
-                acceptTerminal(8);
-                acceptTerminal(17);
+                acceptTerminal(Token.endSymbol);
+                acceptTerminal(Token.ifSymbol);
                 break;
             default:
                 acceptTerminal(Token.ifSymbol);
                 break;
         }
-
+        myGenerate.finishNonterminal("<if statement>");
     }
 
     void _expression_() throws IOException, CompilationException {
-
-        switch (nextToken.symbol)
+        myGenerate.commenceNonterminal("<expression>");
+        _term_();
+        while (nextToken.symbol == Token.plusSymbol || nextToken.symbol == Token.minusSymbol)
         {
-            case 27:
-                acceptTerminal(27);
-                _term_();
-                break;
-            case 24:
-                acceptTerminal(24);
-                _term_();
-                break;
-            default:
-                _term_();
-                if (nextToken.symbol == 27 || nextToken.symbol == 24) _expression_();
-                break;
+            acceptTerminal(nextToken.symbol);
+            _term_();
         }
 
+        myGenerate.finishNonterminal("<expression>");
     }
 
     void _factor_() throws IOException, CompilationException {
-
+        myGenerate.commenceNonterminal("<factor>");
         switch (nextToken.symbol)
         {
             case 16:
@@ -168,28 +183,24 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
             default:
                 break;
         }
+        myGenerate.finishNonterminal("<factor>");
 
     }
 
     void _term_() throws IOException, CompilationException {
-        switch (nextToken.symbol)
+        myGenerate.commenceNonterminal("<term>");
+        _factor_();
+        while (nextToken.symbol == Token.timesSymbol || nextToken.symbol == Token.divideSymbol)
         {
-            case 6:
-                acceptTerminal(6);
-                _factor_();
-                break;
-            case 33:
-                acceptTerminal(33);
-                _factor_();
-                break;
-            default:
-               _factor_();
-                if (nextToken.symbol == 6 || nextToken.symbol == 33) _term_();
-                break;
+            acceptTerminal(nextToken.symbol);
+            _factor_();
         }
+        //if (nextToken.symbol == Token.divideSymbol || nextToken.symbol == Token.timesSymbol) _term_();
+        myGenerate.finishNonterminal("<term>");
     }
 
     void _condition_() throws IOException, CompilationException {
+        myGenerate.commenceNonterminal("<condition>");
         acceptTerminal(16);
         _conditionalOperator_();
         switch (nextToken.symbol){
@@ -203,9 +214,12 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
                 acceptTerminal(31);
                 break;
         }
+        myGenerate.finishNonterminal("<condition>");
+
     }
 
     public void _conditionalOperator_()  throws IOException, CompilationException {
+        myGenerate.commenceNonterminal("<conditional operator>");
         switch (nextToken.symbol){
             case 14:
                 acceptTerminal(14);
@@ -226,28 +240,17 @@ public class SyntaxAnalyser extends AbstractSyntaxAnalyser {
                 acceptTerminal(22);
                 break;
         }
-    }
+        myGenerate.finishNonterminal("<conditional operator>");
 
-    public boolean identifierToken() throws IOException, CompilationException
-    {
-        Token tok = lex.getNextToken();
-        if (tok.symbol == 1)
-        {
-            tok = lex.getNextToken();
-            if (tok.symbol == 26 || tok.symbol == 31 )
-            {
-                return true;
-            }
-            myGenerate.reportError(tok, "Assignment without valid identifier.");
-            return false;
-        }
-        myGenerate.reportError(tok, "Identifier without equals sign.");
-        return false;
     }
 
     @Override
     void acceptTerminal(int symbol) throws IOException, CompilationException {
         if (nextToken.symbol != symbol) {
+            if (symbol == Token.semicolonSymbol)
+            {
+                myGenerate.reportError(nextToken, null);
+            }
             myGenerate.reportError(nextToken, Token.getName(symbol));
             throw new CompilationException();
         } else {
