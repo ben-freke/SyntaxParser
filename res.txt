@@ -1,13 +1,47 @@
-CompilationException: Error. Received: "begim" on Line 1. Expecting: "begin"
-CompilationException: Error. Did not receive closing statement for "if" on Line 11
-CompilationException: Error. Received: ";" on Line 7. Expecting: "loop"
-CompilationException: ------- Error ------- 
+CompilationException: 
+------- Error ------- 
+ File: Programs Folder\program2
+ Line: 1
+ Token: begim
+ Expecting: begin 
+ Message: Received "begim"
+
+CompilationException: 
+------- Error ------- 
+ File: Programs Folder\program3
+ Line: 11
+ Token: 
+ Expecting: if 
+ Message: Did not receive closing statement for if
+
+CompilationException: 
+------- Error ------- 
+ File: Programs Folder\program4
+ Line: 7
+ Token: end
+ Expecting: Statement 
+ Message: Received "end" after calling ";"
+
+CompilationException: 
+------- Error ------- 
+ File: Programs Folder\program5
+ Line: 7
+ Token: ;
+ Expecting: loop 
+ Message: Received ";"
+
+CompilationException: 
+------- Error ------- 
+ File: Programs Folder\program7
  Line: 4
  Token: else 
  Message: Received: "else" without corresponding "if"
-CompilationException: ------- Error ------- 
+
+CompilationException: 
+------- Error ------- 
+ File: Programs Folder\program8
  Line: 12
  Token: call
  Expecting: EOF 
- Message: Received: "call" after calling "end"
+ Message: Received "call" after calling "end"
 
